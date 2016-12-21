@@ -75,7 +75,7 @@ public class MoviesFragment extends Fragment {
     public void onStart() {
         super.onStart();
         FetchMoviesTask moviesTask = new FetchMoviesTask();
-        moviesTask.execute("popularity.desc");
+        moviesTask.execute("popular");
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
@@ -99,17 +99,13 @@ public class MoviesFragment extends Fragment {
 
             // Will contain the raw JSON response as a string.
             String moviesJsonStr = null;
-            String format = "json";
 
             try {
-                final String TMDB_BASE_URL = "https://api.themoviedb.org/3/discover/movie?";
-                final String FORMAT_PARAM = "mode";
-                final String QUERY_PARAM = "sort_by";
+                final String TMDB_BASE_URL = "http://api.themoviedb.org/3/movie/";
                 final String APPID_PARAM = "api_key";
 
                 Uri builtUri = Uri.parse(TMDB_BASE_URL).buildUpon()
-                        .appendQueryParameter(FORMAT_PARAM, format)
-                        .appendQueryParameter(QUERY_PARAM, sortBy[0])
+                        .appendPath(sortBy[0])
                         .appendQueryParameter(APPID_PARAM, BuildConfig.TMDB_API_KEY)
                         .build();
 
@@ -197,12 +193,15 @@ public class MoviesFragment extends Fragment {
 
                 // Get the JSON object representing the movie
                 JSONObject movieResult = moviesArray.getJSONObject(i);
-                movies[i].id = movieResult.getInt(TMDB_ID);
-                movies[i].title = movieResult.getString(TMDB_TITLE);
-                movies[i].thumbnailUrl = getThumbnailUrl(movieResult.getString(TMDB_POSTER_PATH));
-                movies[i].overview = movieResult.getString(TMDB_OVERVIEW);
-                movies[i].releaseDate = getFormattedDate(movieResult.getString(TMDB_RELEASE_DATE));
-                movies[i].userRating = movieResult.getDouble(TMDB_USER_RATING);
+
+                movies[i] = new Movie(
+                        movieResult.getString(TMDB_ID),
+                        movieResult.getString(TMDB_TITLE),
+                        getThumbnailUrl(movieResult.getString(TMDB_POSTER_PATH)),
+                        movieResult.getString(TMDB_OVERVIEW),
+                        getFormattedDate(movieResult.getString(TMDB_RELEASE_DATE)),
+                        movieResult.getString(TMDB_USER_RATING)
+                );
             }
 
             return movies;
@@ -227,7 +226,7 @@ public class MoviesFragment extends Fragment {
 
                 builtUri = Uri.parse(TMDB_IMAGE_BASE_URL).buildUpon()
                         .appendPath(imageSize)
-                        .appendPath(posterPath)
+                        .appendEncodedPath(posterPath)
                         .build();
             } catch (Exception e) {
             }
