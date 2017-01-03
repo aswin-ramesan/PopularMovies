@@ -15,7 +15,7 @@
         android:id="@+id/gridview_movies"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="2"
+        android:numColumns="auto_fit"
         android:gravity="center" />
 
 </FrameLayout>
